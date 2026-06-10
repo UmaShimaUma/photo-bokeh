@@ -17,6 +17,7 @@ export type SideViewLayout = {
   subjectDistanceLabel: string;
   backgroundDistanceLabel: string;
   backgroundBlurPixels: number;
+  backgroundBlurPercent: number;
 };
 
 export type SimulationResult = {

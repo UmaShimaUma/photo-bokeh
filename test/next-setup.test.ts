@@ -30,5 +30,6 @@ describe('Next.js / TypeScript 構成', () => {
     assert.match(pageSource, /木/);
     assert.match(pageSource, /人まで/);
     assert.match(pageSource, /木まで/);
+    assert.match(pageSource, /木のボケ具合/);
   });
 });

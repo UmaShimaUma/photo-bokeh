@@ -409,6 +409,11 @@ dd {
   flex-direction: column;
 }
 
+.mini-tree {
+  transform-origin: bottom center;
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
 .mini-person i {
   background: #f0b996;
   border: 4px solid #382a28;
@@ -480,4 +485,66 @@ dd {
   .distance-band {
     font-size: 0.68rem;
   }
+}
+
+.preview-tree-layer {
+  align-items: center;
+  bottom: 6%;
+  display: flex;
+  flex-direction: column;
+  left: 74%;
+  position: absolute;
+  transform-origin: bottom center;
+  transition: filter 160ms ease, transform 160ms ease;
+  width: 26%;
+  z-index: -1;
+}
+
+.preview-tree-crown {
+  background:
+    radial-gradient(circle at 35% 28%, #8fcf68 0 20%, transparent 21%),
+    radial-gradient(circle at 62% 30%, #5fa848 0 24%, transparent 25%),
+    radial-gradient(circle at 48% 58%, #2f7d45 0 38%, transparent 39%);
+  border-radius: 50% 48% 54% 46%;
+  filter: saturate(1.05);
+  height: clamp(120px, 19vw, 220px);
+  width: clamp(130px, 22vw, 250px);
+}
+
+.preview-tree-trunk {
+  background: linear-gradient(90deg, #7a4a2a, #a36a3c 50%, #6c3f24);
+  border-radius: 12px 12px 4px 4px;
+  height: clamp(96px, 16vw, 180px);
+  margin-top: -1.6rem;
+  width: clamp(22px, 4vw, 46px);
+}
+
+.blur-meter {
+  align-items: center;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: auto minmax(80px, 1fr) auto;
+  margin-top: 0.85rem;
+}
+
+.blur-meter span,
+.blur-meter strong {
+  color: var(--accent-dark);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.blur-meter-track {
+  background: rgba(29, 36, 51, 0.10);
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.blur-meter-track i {
+  background: linear-gradient(90deg, rgba(209, 95, 47, 0.45), rgba(209, 95, 47, 0.95));
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 160ms ease;
 }

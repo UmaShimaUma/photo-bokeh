@@ -78,6 +78,17 @@ export default function SimulatorPage() {
               <span />
               <span />
             </div>
+            <div
+              className="preview-tree-layer"
+              aria-hidden="true"
+              style={{
+                filter: `blur(${result.cssBlurPixels}px)`,
+                transform: `translateX(-50%) scale(${1 + result.cssBlurPixels / 72})`,
+              }}
+            >
+              <span className="preview-tree-crown" />
+              <span className="preview-tree-trunk" />
+            </div>
             <div className="subject-layer">
               <div className="person-head" />
               <div className="person-body" />
@@ -117,12 +128,16 @@ export default function SimulatorPage() {
               </div>
               <div
                 className="side-view-object tree-object"
-                style={{
-                  filter: `blur(${result.sideView.backgroundBlurPixels / 2}px)`,
-                  left: `${result.sideView.backgroundPositionPercent}%`,
-                }}
+                style={{ left: `${result.sideView.backgroundPositionPercent}%` }}
               >
-                <span className="mini-tree" aria-hidden="true">
+                <span
+                  className="mini-tree"
+                  aria-hidden="true"
+                  style={{
+                    filter: `blur(${result.sideView.backgroundBlurPixels}px)`,
+                    transform: `scale(${1 + result.sideView.backgroundBlurPixels / 90})`,
+                  }}
+                >
                   <i />
                   <b />
                 </span>
@@ -147,6 +162,13 @@ export default function SimulatorPage() {
               >
                 木まで {result.sideView.backgroundDistanceLabel}
               </div>
+            </div>
+            <div className="blur-meter" aria-label={`木のボケ具合 ${result.sideView.backgroundBlurPercent}%`}>
+              <span>木のボケ具合</span>
+              <div className="blur-meter-track">
+                <i style={{ width: `${result.sideView.backgroundBlurPercent}%` }} />
+              </div>
+              <strong>{result.sideView.backgroundBlurPercent}%</strong>
             </div>
             <p className="side-view-note">
               人はピント位置、木は背景です。人と木の間が広がるほど、写真プレビューの木側がより大きくボケます。

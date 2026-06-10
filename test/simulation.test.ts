@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { calculateSideViewLayout, getBlurLabel, normalizeSettings, simulate } from '../src/simulation.ts';
+import { calculateCssBlurPixels, calculateSideViewLayout, getBlurLabel, normalizeSettings, simulate } from '../src/simulation.ts';
 
 describe('背景ボケシミュレーション', () => {
   it('TC-001: 初期設定で背景がしっかりボケる', () => {
@@ -85,7 +85,20 @@ describe('背景ボケシミュレーション', () => {
     assert.ok(farLayout.subjectPositionPercent > closeLayout.subjectPositionPercent);
     assert.ok(farLayout.backgroundPositionPercent > closeLayout.backgroundPositionPercent);
     assert.ok(farLayout.backgroundBlurPixels > closeLayout.backgroundBlurPixels);
+    assert.ok(farLayout.backgroundBlurPercent > closeLayout.backgroundBlurPercent);
     assert.equal(result.sideView.subjectDistanceLabel, '2.0m');
     assert.equal(result.sideView.backgroundDistanceLabel, '8.0m');
+  });
+
+  it('TC-011: 人と木の距離差が小さいとボケが弱く、距離差が大きいとボケが強く見える', () => {
+    const smallGap = simulate({ focalLength: 50, aperture: 2.8, subjectDistance: 2, backgroundDistance: 2.2 });
+    const largeGap = simulate({ focalLength: 50, aperture: 2.8, subjectDistance: 2, backgroundDistance: 10 });
+
+    assert.ok(smallGap.blurScore <= 20);
+    assert.ok(largeGap.blurScore >= 76);
+    assert.ok(largeGap.cssBlurPixels - smallGap.cssBlurPixels >= 20);
+    assert.ok(largeGap.sideView.backgroundBlurPercent - smallGap.sideView.backgroundBlurPercent >= 50);
+    assert.equal(calculateCssBlurPixels(0), 0);
+    assert.equal(calculateCssBlurPixels(100), 36);
   });
 });
