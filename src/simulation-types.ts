@@ -10,6 +10,15 @@ export type CameraSettings = {
 
 export type CameraSettingsInput = Partial<Omit<CameraSettings, 'sensor'> & { sensor: SensorSize | string }>;
 
+export type SideViewLayout = {
+  cameraPositionPercent: number;
+  subjectPositionPercent: number;
+  backgroundPositionPercent: number;
+  subjectDistanceLabel: string;
+  backgroundDistanceLabel: string;
+  backgroundBlurPixels: number;
+};
+
 export type SimulationResult = {
   settings: CameraSettings;
   depthOfFieldNear: number;
@@ -19,4 +28,5 @@ export type SimulationResult = {
   blurLabel: string;
   cssBlurPixels: number;
   angleOfViewDegrees: number;
+  sideView: SideViewLayout;
 };

@@ -1,4 +1,4 @@
-import type { CameraSettings, CameraSettingsInput, SensorSize, SimulationResult } from './simulation-types';
+import type { CameraSettings, CameraSettingsInput, SensorSize, SideViewLayout, SimulationResult } from './simulation-types';
 
 const SENSOR_CONFIG: Record<SensorSize, {
   cropFactor: number;
@@ -95,6 +95,32 @@ function roundMetric(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+function formatDistanceLabel(value: number): string {
+  return `${value.toFixed(1)}m`;
+}
+
+function calculateSideViewLayout(settings: CameraSettingsInput, blurPixels?: number): SideViewLayout {
+  const normalized = normalizeSettings(settings);
+  const resolvedBlurPixels = blurPixels ?? (calculateBlurScore(normalized) / 100) * 24;
+  const cameraPositionPercent = 8;
+  const subjectRatio = (normalized.subjectDistance - LIMITS.subjectDistance.min)
+    / (LIMITS.subjectDistance.max - LIMITS.subjectDistance.min);
+  const backgroundRatio = (normalized.backgroundDistance - LIMITS.backgroundDistance.min)
+    / (LIMITS.backgroundDistance.max - LIMITS.backgroundDistance.min);
+  const subjectPositionPercent = roundMetric(24 + subjectRatio * 34);
+  const backgroundFromDistance = 38 + backgroundRatio * 52;
+  const backgroundPositionPercent = roundMetric(clamp(backgroundFromDistance, subjectPositionPercent + 8, 90));
+
+  return {
+    cameraPositionPercent,
+    subjectPositionPercent,
+    backgroundPositionPercent,
+    subjectDistanceLabel: formatDistanceLabel(normalized.subjectDistance),
+    backgroundDistanceLabel: formatDistanceLabel(normalized.backgroundDistance),
+    backgroundBlurPixels: Math.round(resolvedBlurPixels),
+  };
+}
+
 function calculateAngleOfView(settings: CameraSettingsInput): number {
   const normalized = normalizeSettings(settings);
   const { sensorWidthMm } = SENSOR_CONFIG[normalized.sensor];
@@ -108,13 +134,16 @@ function simulate(settings: CameraSettingsInput = {}): SimulationResult {
   const blurScore = calculateBlurScore(normalized);
   const depthOfField = calculateDepthOfField(normalized);
 
+  const cssBlurPixels = Math.round((blurScore / 100) * 24);
+
   return {
     settings: normalized,
     ...depthOfField,
     blurScore,
     blurLabel: getBlurLabel(blurScore),
-    cssBlurPixels: Math.round((blurScore / 100) * 24),
+    cssBlurPixels,
     angleOfViewDegrees: calculateAngleOfView(normalized),
+    sideView: calculateSideViewLayout(normalized, cssBlurPixels),
   };
 }
 
@@ -124,6 +153,7 @@ export {
   calculateAngleOfView,
   calculateBlurScore,
   calculateDepthOfField,
+  calculateSideViewLayout,
   getBlurLabel,
   normalizeSettings,
   simulate,

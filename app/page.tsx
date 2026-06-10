@@ -86,6 +86,72 @@ export default function SimulatorPage() {
           <p className="preview-caption">
             被写体はくっきり、背景は {result.blurLabel}。焦点距離が長いほど画角は狭く見えます。
           </p>
+          <div className="side-view-card" aria-label="横方向から見たカメラ・人・木の距離図">
+            <div className="side-view-header">
+              <div>
+                <p className="side-view-title">横から見た距離イメージ</p>
+                <span>カメラから人、木までの距離と背景ボケの関係</span>
+              </div>
+              <strong>{result.blurLabel}</strong>
+            </div>
+            <div className="side-view-stage">
+              <div className="side-view-rail" />
+              <div
+                className="side-view-object camera-object"
+                style={{ left: `${result.sideView.cameraPositionPercent}%` }}
+              >
+                <span className="camera-icon" aria-hidden="true" />
+                <strong>カメラ</strong>
+                <small>0m</small>
+              </div>
+              <div
+                className="side-view-object person-object"
+                style={{ left: `${result.sideView.subjectPositionPercent}%` }}
+              >
+                <span className="mini-person" aria-hidden="true">
+                  <i />
+                  <b />
+                </span>
+                <strong>人</strong>
+                <small>{result.sideView.subjectDistanceLabel}</small>
+              </div>
+              <div
+                className="side-view-object tree-object"
+                style={{
+                  filter: `blur(${result.sideView.backgroundBlurPixels / 2}px)`,
+                  left: `${result.sideView.backgroundPositionPercent}%`,
+                }}
+              >
+                <span className="mini-tree" aria-hidden="true">
+                  <i />
+                  <b />
+                </span>
+                <strong>木</strong>
+                <small>{result.sideView.backgroundDistanceLabel}</small>
+              </div>
+              <div
+                className="distance-band subject-band"
+                style={{
+                  left: `${result.sideView.cameraPositionPercent}%`,
+                  width: `${result.sideView.subjectPositionPercent - result.sideView.cameraPositionPercent}%`,
+                }}
+              >
+                人まで {result.sideView.subjectDistanceLabel}
+              </div>
+              <div
+                className="distance-band background-band"
+                style={{
+                  left: `${result.sideView.subjectPositionPercent}%`,
+                  width: `${result.sideView.backgroundPositionPercent - result.sideView.subjectPositionPercent}%`,
+                }}
+              >
+                木まで {result.sideView.backgroundDistanceLabel}
+              </div>
+            </div>
+            <p className="side-view-note">
+              人はピント位置、木は背景です。人と木の間が広がるほど、写真プレビューの木側がより大きくボケます。
+            </p>
+          </div>
         </div>
 
         <div className="controls-card">

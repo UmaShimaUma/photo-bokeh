@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { getBlurLabel, normalizeSettings, simulate } from '../src/simulation.ts';
+import { calculateSideViewLayout, getBlurLabel, normalizeSettings, simulate } from '../src/simulation.ts';
 
 describe('背景ボケシミュレーション', () => {
   it('TC-001: 初期設定で背景がしっかりボケる', () => {
@@ -73,5 +73,19 @@ describe('背景ボケシミュレーション', () => {
     assert.equal(normalized.aperture, 1.4);
     assert.equal(normalized.subjectDistance, 0.5);
     assert.equal(normalized.backgroundDistance, 30);
+  });
+
+  it('TC-010: 横方向イメージ図で人と木の距離と木のボケ量を確認できる', () => {
+    const closeLayout = calculateSideViewLayout({ subjectDistance: 1, backgroundDistance: 2, aperture: 8 });
+    const farLayout = calculateSideViewLayout({ subjectDistance: 4, backgroundDistance: 10, aperture: 1.4 });
+    const result = simulate({ subjectDistance: 2, backgroundDistance: 8 });
+
+    assert.ok(closeLayout.cameraPositionPercent < closeLayout.subjectPositionPercent);
+    assert.ok(closeLayout.subjectPositionPercent < closeLayout.backgroundPositionPercent);
+    assert.ok(farLayout.subjectPositionPercent > closeLayout.subjectPositionPercent);
+    assert.ok(farLayout.backgroundPositionPercent > closeLayout.backgroundPositionPercent);
+    assert.ok(farLayout.backgroundBlurPixels > closeLayout.backgroundBlurPixels);
+    assert.equal(result.sideView.subjectDistanceLabel, '2.0m');
+    assert.equal(result.sideView.backgroundDistanceLabel, '8.0m');
   });
 });
