@@ -1,4 +1,4 @@
-import type { CameraSettings, CameraSettingsInput, SensorSize, SimulationResult } from './simulation-types';
+import type { CameraSettings, CameraSettingsInput, SensorSize, SideViewLayout, SimulationResult } from './simulation-types';
 
 const SENSOR_CONFIG: Record<SensorSize, {
   cropFactor: number;
@@ -24,6 +24,8 @@ const DEFAULT_SETTINGS: CameraSettings = Object.freeze({
   subjectDistance: 2,
   backgroundDistance: 5,
 });
+
+const MAX_CSS_BLUR_PIXELS = 36;
 
 const LIMITS = Object.freeze({
   focalLength: { min: 20, max: 300 },
@@ -62,7 +64,8 @@ function calculateBlurScore(settings: CameraSettingsInput): number {
   const apertureFactor = Math.sqrt(2.8 / normalized.aperture);
   const focalFactor = Math.sqrt(normalized.focalLength / 50);
   const subjectFactor = Math.sqrt(2 / normalized.subjectDistance);
-  const backgroundFactor = Math.log1p(normalized.backgroundDistance) / Math.log1p(5);
+  const backgroundSeparation = Math.max(0.1, normalized.backgroundDistance - normalized.subjectDistance);
+  const backgroundFactor = Math.log1p(backgroundSeparation * 1.8) / Math.log1p(3 * 1.8);
   const rawScore = 62 * apertureFactor * focalFactor * subjectFactor * backgroundFactor * sensorFactor;
 
   return Math.round(clamp(rawScore, 0, 100));
@@ -95,6 +98,39 @@ function roundMetric(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+function calculateCssBlurPixels(score: number): number {
+  const normalizedScore = clamp(score, 0, 100) / 100;
+
+  return Math.round((normalizedScore ** 1.2) * MAX_CSS_BLUR_PIXELS);
+}
+
+function formatDistanceLabel(value: number): string {
+  return `${value.toFixed(1)}m`;
+}
+
+function calculateSideViewLayout(settings: CameraSettingsInput, blurPixels?: number): SideViewLayout {
+  const normalized = normalizeSettings(settings);
+  const resolvedBlurPixels = blurPixels ?? calculateCssBlurPixels(calculateBlurScore(normalized));
+  const cameraPositionPercent = 8;
+  const subjectRatio = (normalized.subjectDistance - LIMITS.subjectDistance.min)
+    / (LIMITS.subjectDistance.max - LIMITS.subjectDistance.min);
+  const backgroundRatio = (normalized.backgroundDistance - LIMITS.backgroundDistance.min)
+    / (LIMITS.backgroundDistance.max - LIMITS.backgroundDistance.min);
+  const subjectPositionPercent = roundMetric(24 + subjectRatio * 34);
+  const backgroundFromDistance = 38 + backgroundRatio * 52;
+  const backgroundPositionPercent = roundMetric(clamp(backgroundFromDistance, subjectPositionPercent + 8, 90));
+
+  return {
+    cameraPositionPercent,
+    subjectPositionPercent,
+    backgroundPositionPercent,
+    subjectDistanceLabel: formatDistanceLabel(normalized.subjectDistance),
+    backgroundDistanceLabel: formatDistanceLabel(normalized.backgroundDistance),
+    backgroundBlurPixels: Math.round(resolvedBlurPixels),
+    backgroundBlurPercent: Math.round((resolvedBlurPixels / MAX_CSS_BLUR_PIXELS) * 100),
+  };
+}
+
 function calculateAngleOfView(settings: CameraSettingsInput): number {
   const normalized = normalizeSettings(settings);
   const { sensorWidthMm } = SENSOR_CONFIG[normalized.sensor];
@@ -108,13 +144,16 @@ function simulate(settings: CameraSettingsInput = {}): SimulationResult {
   const blurScore = calculateBlurScore(normalized);
   const depthOfField = calculateDepthOfField(normalized);
 
+  const cssBlurPixels = calculateCssBlurPixels(blurScore);
+
   return {
     settings: normalized,
     ...depthOfField,
     blurScore,
     blurLabel: getBlurLabel(blurScore),
-    cssBlurPixels: Math.round((blurScore / 100) * 24),
+    cssBlurPixels,
     angleOfViewDegrees: calculateAngleOfView(normalized),
+    sideView: calculateSideViewLayout(normalized, cssBlurPixels),
   };
 }
 
@@ -124,6 +163,8 @@ export {
   calculateAngleOfView,
   calculateBlurScore,
   calculateDepthOfField,
+  calculateCssBlurPixels,
+  calculateSideViewLayout,
   getBlurLabel,
   normalizeSettings,
   simulate,

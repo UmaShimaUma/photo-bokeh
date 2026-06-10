@@ -1,5 +1,6 @@
 /// <reference types="next" />
 /// <reference types="next/image-types/global" />
+import "./.next/types/routes.d.ts";
 
-// このファイルは Next.js の TypeScript 型定義を読み込むために必要です。
-// 手動で編集せず、Next.js の規約に合わせて保持してください。
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.

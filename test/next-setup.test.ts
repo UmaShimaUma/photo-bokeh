@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const tsconfig = JSON.parse(readFileSync(new URL('../tsconfig.json', import.meta.url), 'utf8'));
+const pageSource = readFileSync(new URL('../app/page.tsx', import.meta.url), 'utf8');
 
 describe('Next.js / TypeScript 構成', () => {
   it('TC-009: Next.js と TypeScript でVercel向けに起動できる構成にする', () => {
@@ -20,5 +21,15 @@ describe('Next.js / TypeScript 構成', () => {
     assert.equal(tsconfig.compilerOptions.strict, true);
     assert.ok(existsSync(new URL('../next.config.ts', import.meta.url)));
     assert.ok(existsSync(new URL('../app/page.tsx', import.meta.url)));
+  });
+
+  it('TC-010: 横方向イメージ図の日本語UIを表示する', () => {
+    assert.match(pageSource, /横から見た距離イメージ/);
+    assert.match(pageSource, /カメラ/);
+    assert.match(pageSource, /人/);
+    assert.match(pageSource, /木/);
+    assert.match(pageSource, /人まで/);
+    assert.match(pageSource, /木まで/);
+    assert.match(pageSource, /木のボケ具合/);
   });
 });
